@@ -69,11 +69,16 @@ void EU4::Country::initializeFromTitle(const std::string& theTag,
 	if (details.holder->getHouse().first)
 		details.house = details.holder->getHouse().second;
 
+	Log(LogLevel::Warning) << "Past the logic";
 	populateHistory(governmentsMapper, religionMapper, provinceMapper, cultureMapper);
+	Log(LogLevel::Warning) << "Past History";
 	populateCommons(cultureMapper, localizationMapper);
 	populateMisc();
+	Log(LogLevel::Warning) << "Past Misc";
 	populateLocs(localizationMapper);
+	Log(LogLevel::Warning) << "Past Locs";
 	populateRulers(religionMapper, cultureMapper, rulerPersonalitiesMapper, localizationMapper, startDateOption, theConversionDate);
+	Log(LogLevel::Warning) << "Past Populate Rulers";
 }
 
 void EU4::Country::populateHistory(const mappers::GovernmentsMapper& governmentsMapper,
@@ -81,13 +86,14 @@ void EU4::Country::populateHistory(const mappers::GovernmentsMapper& governments
 	 const mappers::ProvinceMapper& provinceMapper,
 	 const mappers::CultureMapper& cultureMapper)
 {
+	Log(LogLevel::Info) << "At least past variables";
 	// Are we sane?
 	if (!details.holder->getCharacterDomain())
 	{
 		Log(LogLevel::Warning) << tag << "'s holder has no domain. Breaking history init.";
 		return;
 	}
-
+	Log(LogLevel::Info) << "Past sanity check";
 	// --------------- History section
 	details.government.clear();
 	details.reforms.clear();
@@ -111,6 +117,7 @@ void EU4::Country::populateHistory(const mappers::GovernmentsMapper& governments
 	else
 		details.governmentRank = 1;
 	// Reforms will be set later to ensure that all other aspects of a country have been correctly set first.
+	Log(LogLevel::Info) << "Past History section";
 
 	std::string baseReligion;
 	std::string baseReligiousHead;
@@ -215,6 +222,7 @@ void EU4::Country::populateHistory(const mappers::GovernmentsMapper& governments
 
 	// Unit type should automatically match tech group. If not we'll add logic for it here.
 	details.unitType.clear();
+	Log(LogLevel::Warning) << "Past unitType clear";
 	// ditto for cults
 	details.cults.clear();
 	// We fill accepted cultures later, manually, once we can do a provincial census
@@ -606,12 +614,14 @@ void EU4::Country::populateRulers(const mappers::ReligionMapper& religionMapper,
 
 	// Are we the ruler's primary title? (if he has any)
 	// Potential PU's don't get monarchs. (and those apply for monarchies only)
+	Log(LogLevel::Warning) << "Piuzinho briga contra orochi";
 	if (!details.holder->getCharacterDomain()->getDomain()[0].second)
 		return; // corruption
 	if (details.holder->getCharacterDomain()->getDomain()[0].second->getName() != title->first && details.government == "monarchy")
 		return;
 
 	// Determine regnalness.
+	Log(LogLevel::Warning) << "getting regal";
 	auto actualName = details.holder->getName();
 	const auto& nameLoc = localizationMapper.getLocBlockForKey(actualName);
 	if (nameLoc)
@@ -635,6 +645,7 @@ void EU4::Country::populateRulers(const mappers::ReligionMapper& religionMapper,
 	{
 		details.monarch.name = actualName;
 	}
+	Log(LogLevel::Warning) << "Before getting house";
 	if (details.holder->getHouse().first)
 	{
 		std::string dynastyName;
@@ -657,7 +668,7 @@ void EU4::Country::populateRulers(const mappers::ReligionMapper& religionMapper,
 		}
 		details.monarch.dynasty = dynastyName;
 	}
-
+	Log(LogLevel::Warning) << "Before monarch learning";
 	details.monarch.adm = std::min((details.holder->getSkills().stewardship + details.holder->getSkills().learning) / 3, 6);
 	details.monarch.dip = std::min((details.holder->getSkills().diplomacy + details.holder->getSkills().intrigue) / 3, 6);
 	details.monarch.mil = std::min((details.holder->getSkills().martial + details.holder->getSkills().learning) / 3, 6);
@@ -700,7 +711,7 @@ void EU4::Country::populateRulers(const mappers::ReligionMapper& religionMapper,
 				dynastyName += dynasty; // There may be errors here with unresolved keys but it's not our fault.
 		}
 		details.queen.dynasty = dynastyName;
-
+		Log(LogLevel::Warning) << "Just Before queen learning";
 		details.queen.adm = std::min((spouse->getSkills().stewardship + spouse->getSkills().learning) / 3, 6);
 		details.queen.dip = std::min((spouse->getSkills().diplomacy + spouse->getSkills().intrigue) / 3, 6);
 		details.queen.mil = std::min((spouse->getSkills().martial + spouse->getSkills().learning) / 3, 6);
@@ -724,6 +735,7 @@ void EU4::Country::populateRulers(const mappers::ReligionMapper& religionMapper,
 		{
 			details.queen.religion = details.monarch.religion; // taking a shortcut.
 		}
+		Log(LogLevel::Warning) << "Just before culture";
 		if (spouse->getCulture())
 		{
 			const auto& cultureMatch = cultureMapper.cultureMatch(spouse->getCulture()->second->getName(), details.queen.religion, 0, tag);
@@ -741,13 +753,14 @@ void EU4::Country::populateRulers(const mappers::ReligionMapper& religionMapper,
 		{
 			details.queen.culture = details.monarch.culture; // taking a shortcut.
 		}
+		Log(LogLevel::Warning) << "Just before origin country";
 		details.queen.originCountry = tag;
 		details.queen.deathDate = details.queen.birthDate;
 		details.queen.deathDate.subtractYears(-60);
 		details.queen.personalities = rulerPersonalitiesMapper.evaluatePersonalities(spouse);
 		details.queen.isSet = true;
 	}
-
+	Log(LogLevel::Warning) << "Just before heir Logic";
 	if (!title->second->getHeirs().empty())
 	{
 		for (const auto& heir: title->second->getHeirs())
@@ -798,7 +811,7 @@ void EU4::Country::populateRulers(const mappers::ReligionMapper& religionMapper,
 					dynastyName += dynasty; // There may be errors here with unresolved keys but it's not our fault.
 			}
 			details.heir.dynasty = dynastyName;
-
+			Log(LogLevel::Warning) << "Just before heir adm";
 			details.heir.adm = std::min((heir.second->getSkills().stewardship + heir.second->getSkills().learning) / 2, 6);
 			details.heir.dip = std::min((heir.second->getSkills().diplomacy + heir.second->getSkills().intrigue) / 2, 6);
 			details.heir.mil = std::min((heir.second->getSkills().martial + heir.second->getSkills().learning) / 2, 6);
@@ -847,7 +860,7 @@ void EU4::Country::populateRulers(const mappers::ReligionMapper& religionMapper,
 			break;
 		}
 	}
-
+	Log(LogLevel::Warning) << "1";
 	// this transformation is always true, heir or not.
 	if (conversionDate.diffInYears(details.monarch.birthDate) < 16)
 	{

@@ -460,6 +460,7 @@ void EU4::World::importCK3Country(const std::pair<std::string, std::shared_ptr<C
 	const auto& countryItr = countries.find(*tag);
 	if (countryItr != countries.end())
 	{
+		Log(LogLevel::Info) << sourceWorld.getConversionDate();
 		countryItr->second->initializeFromTitle(*tag,
 			 title,
 			 governmentsMapper,
